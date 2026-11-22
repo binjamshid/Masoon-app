@@ -1,0 +1,25 @@
+{
+  "corpus_id": "sample_poem",
+  "corpus_kind": "poem",
+  "title": {
+    "ar": "قصيدة تجريبية",
+    "en": "Sample poem"
+  },
+  "recension": "Synthetic demonstration poem, version 1",
+  "source_sha256": "a4a6194718c7ae9bc940b91d45c86663e1b47b3b281db6f68307dfd178cda66e",
+  "units_per_page": 10,
+  "unit_micropages": 100000,
+  "atomic_unit": "line",
+  "boundary_kind": "corpus_block",
+  "works": [
+    {
+      "no": 1,
+      "slug": "window_lamp",
+      "unit_count": 6,
+      "title": {
+        "ar": "مصباح النافذة",
+        "en": "Window Lamp"
+      }
+    }
+  ]
+}

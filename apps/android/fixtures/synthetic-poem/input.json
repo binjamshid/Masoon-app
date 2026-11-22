@@ -1,0 +1,21 @@
+{
+  "plan_id": "00000000-0000-0000-0000-000000000001",
+  "curriculum_definition": "curriculum.json",
+  "corpus_ref": { "kind": "poem", "path": "corpus.json" },
+  "calendar": { "timezone": "UTC", "anchor_date": "2026-01-05", "org_exceptions": [] },
+  "window": { "from": "2026-01-05", "to": "2026-01-07" },
+  "today": "2026-01-04",
+  "policy": {
+    "new_amount": { "unit": "page", "value": 0.2 },
+    "target_range": [{ "surah": 1, "ayah_start": 1, "ayah_end": 8 }],
+    "memorization_order": { "kind": "mushaf_forward" },
+    "active_weekdays": ["mon", "tue", "wed"],
+    "sessions": [{ "id": "practice", "start": "09:00" }],
+    "recovery_policy": { "kind": "strict_backlog" }
+  },
+  "starting_state": {
+    "memorized_ranges": [],
+    "placement_cursor": { "surah": 1, "ayah": 1 }
+  },
+  "event_log": []
+}

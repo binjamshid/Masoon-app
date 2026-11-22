@@ -1,0 +1,94 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "masoon.audio_manifest.v1",
+  "title": "Masoon Audio Manifest v1",
+  "description": "Playback manifest for one reciter and one audio source.",
+  "type": "object",
+  "required": [
+    "reciter_id",
+    "provider",
+    "base_url",
+    "url_template"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "reciter_id": {
+      "$ref": "#/$defs/Identifier"
+    },
+    "provider": {
+      "$ref": "#/$defs/Provider"
+    },
+    "base_url": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^https://"
+    },
+    "url_template": {
+      "$ref": "#/$defs/UrlTemplate"
+    },
+    "license": {
+      "$ref": "#/$defs/License"
+    },
+    "notes": {
+      "type": "string",
+      "minLength": 1
+    }
+  },
+  "$defs": {
+    "Identifier": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]*$"
+    },
+    "Provider": {
+      "description": "Source adapter identifier.",
+      "enum": [
+        "everyayah",
+        "vps"
+      ]
+    },
+    "UrlTemplate": {
+      "description": "Per-unit path template. Supports {work}, {unit}, {work:03}, and {unit:03}. The :03 suffix pads the coordinate to three digits.",
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^(?:[^{}]|\\{work:03\\}|\\{unit:03\\}|\\{work\\}|\\{unit\\})*$"
+    },
+    "License": {
+      "description": "Source attribution and terms metadata. Confirm permissions for the intended distribution with the applicable rights holders.",
+      "type": "object",
+      "required": [
+        "commercial_use"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "url": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "^https://"
+        },
+        "terms_url": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "^https://"
+        },
+        "commercial_use": {
+          "oneOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "const": "unknown"
+            }
+          ]
+        },
+        "notes": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "fixture_id": "synthetic-plan",
+  "plan_id": "00000000-0000-0000-0000-000000000001",
+  "curriculum_definition": "curriculum.json",
+  "corpus_ref": { "kind": "poem", "path": "content-index.json" },
+  "today": "2030-01-07",
+  "window": { "from": "2030-01-07", "to": "2030-01-07" },
+  "policy": {
+    "new_amount": { "unit": "ayah", "value": "2" },
+    "active_weekdays": ["mon"],
+    "sessions": [{ "id": "daily", "start": "08:00" }]
+  },
+  "starting_state": { "memorized_ranges": [], "placement_cursor": { "surah": 1, "ayah": 1 } },
+  "calendar": { "timezone": "UTC", "anchor_date": "2030-01-07" },
+  "event_log": [],
+  "has_assigned_teacher": false
+}

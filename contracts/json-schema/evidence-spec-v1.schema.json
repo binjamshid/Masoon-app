@@ -1,0 +1,149 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "masoon.evidence-spec.v1",
+  "title": "Masoon EvidenceSpec v1",
+  "description": "Standalone copy of the evidence requirement and supporting definitions in the curriculum schema.",
+  "$ref": "#/$defs/EvidenceSpec",
+  "$defs": {
+    "VarRef": {
+      "type": "string",
+      "description": "Reference to a declared variable, such as $takrar_count.",
+      "pattern": "^\\$[a-z_][a-z0-9_]*$"
+    },
+    "IntOrVar": {
+      "oneOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "$ref": "#/$defs/VarRef"
+        }
+      ]
+    },
+    "EvidenceSpec": {
+      "description": "Completion evidence requirement. Audio submission is reserved for a future format.",
+      "not": {
+        "title": "The audio_submission evidence kind is reserved for a future format.",
+        "anyOf": [
+          {
+            "const": "audio_submission"
+          },
+          {
+            "type": "object",
+            "required": [
+              "audio_submission"
+            ],
+            "properties": {
+              "audio_submission": true
+            }
+          }
+        ]
+      },
+      "oneOf": [
+        {
+          "const": "self_check"
+        },
+        {
+          "type": "object",
+          "required": [
+            "timer"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "timer": {
+              "type": "object",
+              "required": [
+                "min_seconds"
+              ],
+              "additionalProperties": false,
+              "properties": {
+                "min_seconds": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              }
+            }
+          }
+        },
+        {
+          "type": "object",
+          "required": [
+            "counter"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "counter": {
+              "type": "object",
+              "required": [
+                "target"
+              ],
+              "additionalProperties": false,
+              "properties": {
+                "target": {
+                  "$ref": "#/$defs/IntOrVar"
+                }
+              }
+            }
+          }
+        },
+        {
+          "type": "object",
+          "required": [
+            "teacher_verification"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "teacher_verification": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "form_version_id": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              }
+            }
+          }
+        },
+        {
+          "type": "object",
+          "required": [
+            "form"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "form": {
+              "type": "object",
+              "required": [
+                "form_version_id"
+              ],
+              "additionalProperties": false,
+              "properties": {
+                "form_version_id": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              }
+            }
+          }
+        },
+        {
+          "type": "object",
+          "required": [
+            "composite"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "composite": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "$ref": "#/$defs/EvidenceSpec"
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

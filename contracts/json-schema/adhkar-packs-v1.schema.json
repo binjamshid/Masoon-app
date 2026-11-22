@@ -1,0 +1,208 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "masoon.adhkar-packs.v1",
+  "title": "Masoon Adhkar Reading Packs v1",
+  "description": "Ordered adhkar reading packs. Position, source attribution, and the distinction between a specified count and a source that gives no count are part of the format.",
+  "type": "object",
+  "required": [
+    "meta",
+    "packs"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "meta": {
+      "$ref": "#/$defs/Meta"
+    },
+    "packs": {
+      "description": "Reading packs in source order.",
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/Pack"
+      }
+    }
+  },
+  "$defs": {
+    "Identifier": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]*$"
+    },
+    "Sha256Hex": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "Meta": {
+      "type": "object",
+      "required": [
+        "note",
+        "subtitle_is_citation",
+        "source_files"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "note": {
+          "description": "Provenance statement for the document.",
+          "type": "string",
+          "minLength": 1
+        },
+        "subtitle_is_citation": {
+          "description": "Indicates that each pack subtitle carries the citation for its repetition counts. Show that citation wherever its counts appear.",
+          "type": "string",
+          "minLength": 1
+        },
+        "source_files": {
+          "description": "Source files and their checksums for import provenance.",
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/SourceFile"
+          }
+        },
+        "post_import_edits": {
+          "$ref": "#/$defs/PostImportEdits"
+        }
+      }
+    },
+    "PostImportEdits": {
+      "description": "Records non-devotional material removed after import while preserving the source provenance.",
+      "type": "object",
+      "required": [
+        "note",
+        "reason",
+        "date",
+        "removed_text",
+        "entries_edited"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "note": {
+          "type": "string",
+          "minLength": 1
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1
+        },
+        "date": {
+          "type": "string",
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+        },
+        "removed_text": {
+          "type": "string",
+          "minLength": 1
+        },
+        "entries_edited": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/EditedEntry"
+          }
+        }
+      }
+    },
+    "EditedEntry": {
+      "type": "object",
+      "required": [
+        "pack",
+        "index"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "pack": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "index": {
+          "type": "integer",
+          "minimum": 1
+        }
+      }
+    },
+    "SourceFile": {
+      "type": "object",
+      "required": [
+        "file",
+        "sha256"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "file": {
+          "type": "string",
+          "minLength": 1
+        },
+        "sha256": {
+          "$ref": "#/$defs/Sha256Hex"
+        }
+      }
+    },
+    "Pack": {
+      "type": "object",
+      "required": [
+        "id",
+        "title_ar",
+        "subtitle_ar",
+        "entry_count",
+        "entries"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "title_ar": {
+          "type": "string",
+          "minLength": 1
+        },
+        "subtitle_ar": {
+          "description": "Required source attribution for the pack and its repetition counts.",
+          "type": "string",
+          "minLength": 1
+        },
+        "entry_count": {
+          "description": "Declared number of entries. Check it against the array length during import.",
+          "type": "integer",
+          "minimum": 1
+        },
+        "entries": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/PackEntry"
+          }
+        }
+      }
+    },
+    "PackEntry": {
+      "type": "object",
+      "required": [
+        "index",
+        "text_ar",
+        "repeat_count"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "index": {
+          "description": "One-based position in the reading order.",
+          "type": "integer",
+          "minimum": 1
+        },
+        "text_ar": {
+          "description": "Arabic text as transcribed from its cited source.",
+          "type": "string",
+          "minLength": 1
+        },
+        "repeat_count": {
+          "description": "Source-stated count, or null when the source gives none. Display a count only when a value is present.",
+          "oneOf": [
+            {
+              "type": "integer",
+              "minimum": 1
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      }
+    }
+  }
+}

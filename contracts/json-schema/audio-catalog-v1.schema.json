@@ -1,0 +1,192 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "masoon.audio_catalog.v1",
+  "title": "Masoon Audio Catalog v1",
+  "description": "Reciter catalog for playback. Each entry identifies its corpus kind and one or more audio sources.",
+  "type": "object",
+  "required": [
+    "meta",
+    "reciters"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "meta": {
+      "$ref": "#/$defs/Meta"
+    },
+    "reciters": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/ReciterEntry"
+      }
+    }
+  },
+  "$defs": {
+    "Identifier": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]*$"
+    },
+    "LocalizedText": {
+      "type": "object",
+      "required": [
+        "ar"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "ar": {
+          "type": "string",
+          "minLength": 1
+        },
+        "en": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "Meta": {
+      "type": "object",
+      "required": [
+        "slug",
+        "title"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "slug": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_-]*$"
+        },
+        "title": {
+          "$ref": "#/$defs/LocalizedText"
+        },
+        "description": {
+          "$ref": "#/$defs/LocalizedText"
+        },
+        "version": {
+          "type": "string",
+          "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$",
+          "default": "1.0.0"
+        },
+        "generated_at": {
+          "description": "UTC time when the catalog was generated or reviewed.",
+          "type": "string",
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$"
+        }
+      }
+    },
+    "Kind": {
+      "description": "Corpus kind covered by the entry.",
+      "enum": [
+        "quran",
+        "poem"
+      ]
+    },
+    "UrlTemplate": {
+      "description": "Per-unit path template. Supports {work}, {unit}, {work:03}, and {unit:03}. The :03 suffix pads the coordinate to three digits.",
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^(?:[^{}]|\\{work:03\\}|\\{unit:03\\}|\\{work\\}|\\{unit\\})*$"
+    },
+    "Provider": {
+      "description": "Source adapter identifier.",
+      "enum": [
+        "everyayah",
+        "vps"
+      ]
+    },
+    "SourceEntry": {
+      "type": "object",
+      "required": [
+        "id",
+        "provider",
+        "base_url",
+        "url_template"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "provider": {
+          "$ref": "#/$defs/Provider"
+        },
+        "base_url": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "^https://"
+        },
+        "url_template": {
+          "$ref": "#/$defs/UrlTemplate"
+        },
+        "notes": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "ReciterEntry": {
+      "type": "object",
+      "required": [
+        "id",
+        "kind",
+        "display_name",
+        "sources"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "kind": {
+          "$ref": "#/$defs/Kind"
+        },
+        "display_name": {
+          "$ref": "#/$defs/LocalizedText"
+        },
+        "sources": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/SourceEntry"
+          }
+        },
+        "unit_counts": {
+          "description": "Per-work counts are required for poem entries. Qur’an entries resolve counts through the Qur’an index.",
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "integer",
+            "exclusiveMinimum": 0
+          }
+        }
+      },
+      "if": {
+        "properties": {
+          "kind": {
+            "const": "quran"
+          }
+        },
+        "required": [
+          "kind"
+        ]
+      },
+      "then": {
+        "not": {
+          "required": [
+            "unit_counts"
+          ],
+          "properties": {
+            "unit_counts": true
+          }
+        }
+      },
+      "else": {
+        "required": [
+          "unit_counts"
+        ],
+        "properties": {
+          "unit_counts": true
+        }
+      }
+    }
+  }
+}

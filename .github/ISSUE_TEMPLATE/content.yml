@@ -1,0 +1,24 @@
+name: Content correction
+description: Identify a passage, reference, translation, curriculum rule or attribution to correct.
+body:
+  - type: input
+    id: edition
+    attributes:
+      label: Work, edition and location
+      description: Include surah and ayah, page, poem line, curriculum rule or entry identifier as appropriate.
+    validations:
+      required: true
+  - type: textarea
+    id: change
+    attributes:
+      label: Current behavior or text and proposed correction
+      description: Quote only the minimum required for verification. Include platform and version if relevant.
+    validations:
+      required: true
+  - type: textarea
+    id: source
+    attributes:
+      label: Source and rights
+      description: Give a publisher, edition or stable reference and the reuse terms if proposing new material. State when permission is unknown.
+    validations:
+      required: true

@@ -1,0 +1,66 @@
+{
+  "fixture_id": "synthetic-poem",
+  "plan_id": "00000000-0000-4000-8000-000000000001",
+  "curriculum_definition": "curriculum.json",
+  "corpus_ref": {
+    "kind": "poem",
+    "path": "poem-ref.json"
+  },
+  "today": "2028-04-30",
+  "window": {
+    "from": "2028-05-01",
+    "to": "2028-05-03"
+  },
+  "policy": {
+    "new_amount": {
+      "unit": "ayah",
+      "value": "2"
+    },
+    "target_range": [
+      {
+        "surah": 1,
+        "ayah_start": 1,
+        "ayah_end": 6
+      }
+    ],
+    "memorization_order": {
+      "kind": "mushaf_forward"
+    },
+    "active_weekdays": [
+      "mon",
+      "tue",
+      "wed"
+    ],
+    "sessions": [
+      {
+        "id": "evening",
+        "start": "18:00"
+      }
+    ],
+    "separate_session_completion": false,
+    "listening_days": [],
+    "listening_count": 1,
+    "takrar_count": 1,
+    "takrar_spacing_minutes": 0,
+    "murajaah_daily_ceiling": {
+      "unit": "page",
+      "value": "1"
+    },
+    "recovery_policy": {
+      "kind": "strict_backlog"
+    }
+  },
+  "starting_state": {
+    "memorized_ranges": [],
+    "placement_cursor": {
+      "surah": 1,
+      "ayah": 1
+    }
+  },
+  "calendar": {
+    "timezone": "UTC",
+    "anchor_date": "2028-05-01",
+    "org_exceptions": []
+  },
+  "event_log": []
+}

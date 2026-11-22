@@ -1,0 +1,19 @@
+{
+  "corpus_id": "synthetic_practice",
+  "corpus_kind": "poem",
+  "title": { "ar": "مجموعة تجريبية", "en": "Synthetic collection" },
+  "recension": "synthetic",
+  "source_sha256": "3fca1cffc6d36e86eeeb5eb1e7b344fd403c5db018525d737652d14dab484ee6",
+  "atomic_unit": "bayt",
+  "boundary_kind": "work_boundary",
+  "unit_micropages": 100000,
+  "units_per_page": 10,
+  "works": [
+    {
+      "no": 1,
+      "slug": "synthetic_work",
+      "title": { "ar": "عمل تجريبي", "en": "Synthetic work" },
+      "unit_count": 8
+    }
+  ]
+}

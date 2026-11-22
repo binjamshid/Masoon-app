@@ -1,0 +1,41 @@
+{
+  "meta": {
+    "slug": "synthetic_practice",
+    "title": { "ar": "تمرين تجريبي", "en": "Synthetic practice" },
+    "corpora": ["poem"],
+    "non_negotiables": []
+  },
+  "units": {
+    "allowed": ["page"],
+    "default_pace": { "unit": "page", "value": 0.2 }
+  },
+  "calendar": {
+    "week_start": "mon",
+    "day_classes": { "practice": ["mon", "tue", "wed"], "rest": ["thu", "fri", "sat", "sun"] },
+    "exception_classes": []
+  },
+  "sessions": [
+    {
+      "id": "practice",
+      "title": { "ar": "تمرين", "en": "Practice" },
+      "default_time": "09:00",
+      "anchor": "fixed"
+    }
+  ],
+  "variables": {},
+  "selectors": {
+    "next_units": { "next_new": { "amount": "$pace" } }
+  },
+  "rules": [
+    {
+      "id": "practice_units",
+      "when": { "day_class": "practice", "session": "practice" },
+      "emit": { "type": "new_hifz", "select": "next_units", "ordering": 0, "est_minutes": 5 }
+    }
+  ],
+  "triggers": [],
+  "forecast": {
+    "workload_rates": { "new_hifz": 10 },
+    "strength_factors": { "weak": 2, "moderate": 1.5, "strong": 1 }
+  }
+}

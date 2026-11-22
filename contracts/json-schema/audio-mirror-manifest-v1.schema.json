@@ -1,0 +1,153 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "masoon.audio_mirror_manifest.v1",
+  "title": "Masoon Audio Mirror Manifest v1",
+  "description": "Playback manifest for a static mirror, with a per-surah package index and optional checksum sidecar.",
+  "type": "object",
+  "required": [
+    "reciter_id",
+    "provider",
+    "base_url",
+    "url_template",
+    "checksums_url",
+    "segments_available",
+    "surah_packages"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "reciter_id": {
+      "$ref": "#/$defs/Identifier"
+    },
+    "provider": {
+      "description": "Adapter for a self-hosted static mirror.",
+      "const": "vps"
+    },
+    "base_url": {
+      "description": "HTTPS base URL. Append the expanded per-unit path template to locate a file.",
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^https://"
+    },
+    "url_template": {
+      "$ref": "#/$defs/UrlTemplate"
+    },
+    "license": {
+      "$ref": "#/$defs/License"
+    },
+    "notes": {
+      "type": "string",
+      "minLength": 1
+    },
+    "checksums_url": {
+      "description": "HTTPS URL of a sidecar mapping per-unit object keys to their SHA-256 digests.",
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^https://"
+    },
+    "segments_available": {
+      "description": "Whether verified timing segments are available for the exact audio files.",
+      "type": "boolean"
+    },
+    "surah_packages": {
+      "description": "Available per-surah packages. The index can be partial or empty.",
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/PackageIndexEntry"
+      }
+    }
+  },
+  "$defs": {
+    "Identifier": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]*$"
+    },
+    "Sha256Hex": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "UrlTemplate": {
+      "description": "Per-unit path template. Supports {work}, {unit}, {work:03}, and {unit:03}. The :03 suffix pads the coordinate to three digits.",
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^(?:[^{}]|\\{work:03\\}|\\{unit:03\\}|\\{work\\}|\\{unit\\})*$"
+    },
+    "License": {
+      "description": "Source attribution and terms metadata. Confirm permissions for the intended distribution with the applicable rights holders.",
+      "type": "object",
+      "required": [
+        "commercial_use"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "url": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "^https://"
+        },
+        "terms_url": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "^https://"
+        },
+        "commercial_use": {
+          "oneOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "const": "unknown"
+            }
+          ]
+        },
+        "notes": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "PackageIndexEntry": {
+      "type": "object",
+      "required": [
+        "surah",
+        "ayah_count",
+        "package_url",
+        "byte_size",
+        "checksum"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "surah": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 114,
+          "description": "Canonical surah number."
+        },
+        "ayah_count": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "description": "Number of per-ayah files in the package. Cross-check with the selected corpus index."
+        },
+        "package_url": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "^https://",
+          "description": "HTTPS URL of the descriptor listing per-ayah objects, sizes, and checksums."
+        },
+        "byte_size": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "description": "Total bytes of the constituent audio files."
+        },
+        "checksum": {
+          "$ref": "#/$defs/Sha256Hex",
+          "description": "SHA-256 of the UTF-8 string formed by joining the per-ayah lowercase SHA-256 digests in ascending ayah order, separated by one newline."
+        }
+      },
+      "description": "Descriptor reference for a surah package made from the original per-ayah files."
+    }
+  }
+}

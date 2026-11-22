@@ -1,0 +1,119 @@
+{
+  "meta": {
+    "slug": "sample-poem-study",
+    "title": {
+      "ar": "تدريب على حفظ قصيدة",
+      "en": "Sample poem study"
+    },
+    "origin": "user",
+    "version": "1.0.0",
+    "non_negotiables": [],
+    "corpora": [
+      "poem"
+    ]
+  },
+  "units": {
+    "allowed": [
+      "page",
+      "ayah"
+    ],
+    "default_pace": {
+      "unit": "ayah",
+      "value": 2
+    }
+  },
+  "calendar": {
+    "week_start": "mon",
+    "day_classes": {
+      "study": [
+        "mon",
+        "tue",
+        "wed"
+      ],
+      "rest": [
+        "thu",
+        "fri",
+        "sat",
+        "sun"
+      ]
+    },
+    "exception_classes": []
+  },
+  "sessions": [
+    {
+      "id": "evening",
+      "title": {
+        "ar": "المساء",
+        "en": "Evening"
+      },
+      "default_time": "18:00",
+      "anchor": "fixed"
+    }
+  ],
+  "variables": {},
+  "selectors": {
+    "next_lines": {
+      "next_new": {
+        "amount": "$pace"
+      }
+    },
+    "prior_day": {
+      "ledger_offset": {
+        "days_ago": 1
+      }
+    }
+  },
+  "rules": [
+    {
+      "id": "review_lines",
+      "when": {
+        "day_class": "study",
+        "session": "evening"
+      },
+      "emit": {
+        "type": "murajaah",
+        "select": "prior_day",
+        "ordering": 0
+      }
+    },
+    {
+      "id": "learn_lines",
+      "when": {
+        "day_class": "study",
+        "session": "evening"
+      },
+      "emit": {
+        "type": "new_hifz",
+        "select": "next_lines",
+        "ordering": 1
+      }
+    }
+  ],
+  "triggers": [
+    {
+      "id": "finish_plan",
+      "on": {
+        "boundary": "target"
+      },
+      "effects": [
+        {
+          "complete_plan": {}
+        }
+      ]
+    }
+  ],
+  "evidence_defaults": {
+    "default": "self_check"
+  },
+  "forecast": {
+    "workload_rates": {
+      "new_hifz": 25,
+      "murajaah": 10
+    },
+    "strength_factors": {
+      "weak": 1,
+      "moderate": 1,
+      "strong": 1
+    }
+  }
+}

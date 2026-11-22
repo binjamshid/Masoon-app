@@ -1,0 +1,81 @@
+{
+  "meta": {
+    "slug": "synthetic-plan",
+    "title": {
+      "en": "Synthetic plan",
+      "ar": "خطة تجريبية"
+    },
+    "corpora": [
+      "poem"
+    ],
+    "non_negotiables": []
+  },
+  "units": {
+    "allowed": [
+      "ayah"
+    ],
+    "default_pace": {
+      "unit": "ayah",
+      "value": 2
+    }
+  },
+  "calendar": {
+    "week_start": "mon",
+    "day_classes": {
+      "practice": [
+        "mon"
+      ],
+      "rest": [
+        "tue",
+        "wed",
+        "thu",
+        "fri",
+        "sat",
+        "sun"
+      ]
+    },
+    "exception_classes": []
+  },
+  "sessions": [
+    {
+      "id": "daily",
+      "title": {
+        "en": "Practice",
+        "ar": "تدريب"
+      },
+      "default_time": "08:00",
+      "anchor": "fixed"
+    }
+  ],
+  "rules": [
+    {
+      "id": "learn",
+      "when": {
+        "day_class": "practice",
+        "session": "daily"
+      },
+      "emit": {
+        "type": "new_hifz",
+        "select": {
+          "next_new": {
+            "amount": "$pace"
+          }
+        },
+        "ordering": 1
+      }
+    }
+  ],
+  "forecast": {
+    "workload_rates": {
+      "new_hifz": 1
+    },
+    "strength_factors": {
+      "weak": 1.5,
+      "moderate": 1.2,
+      "strong": 1
+    }
+  },
+  "variables": {},
+  "selectors": {},
+  "triggers": []
+}

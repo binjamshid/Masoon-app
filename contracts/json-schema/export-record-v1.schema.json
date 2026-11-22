@@ -1,0 +1,577 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "masoon.export-record.v1",
+  "title": "Masoon Export Record v1",
+  "description": "Records following the header in a masoon.jsonl.v1 export. Unknown record kinds fail validation. Recognized event records can carry unrecognized event types and their opaque payloads. This schema validates each line independently.",
+  "oneOf": [
+    {
+      "$ref": "#/$defs/PlanRecord"
+    },
+    {
+      "$ref": "#/$defs/PlanMetaRecord"
+    },
+    {
+      "$ref": "#/$defs/PreferenceRecord"
+    },
+    {
+      "$ref": "#/$defs/EventRecord"
+    },
+    {
+      "$ref": "#/$defs/AdhkarRecord"
+    },
+    {
+      "$ref": "#/$defs/CurriculumDefinitionRecord"
+    },
+    {
+      "$ref": "#/$defs/CorpusRecord"
+    }
+  ],
+  "$defs": {
+    "Identifier": {
+      "type": "string",
+      "description": "Identifier with the same syntax as the curriculum schema.",
+      "pattern": "^[a-z][a-z0-9_]*$"
+    },
+    "Slug": {
+      "type": "string",
+      "description": "Slug with the same syntax as the curriculum schema.",
+      "pattern": "^[a-z][a-z0-9_-]*$"
+    },
+    "SemVer": {
+      "type": "string",
+      "description": "Version syntax shared with the curriculum schema.",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+    },
+    "Iso8601DateTime": {
+      "type": "string",
+      "description": "ISO 8601 timestamp with UTC Z or an explicit numeric offset.",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\\.[0-9]+)?(Z|[+-][0-9]{2}:[0-9]{2})$"
+    },
+    "LocalDate": {
+      "type": "string",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+    },
+    "UuidLike": {
+      "type": "string",
+      "description": "UUID-shaped string with four hyphens.",
+      "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
+    },
+    "Sha256Hex": {
+      "type": "string",
+      "description": "Lowercase hexadecimal SHA-256 digest.",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "LocalizedText": {
+      "type": "object",
+      "description": "Localized text definition shared with the curriculum schema.",
+      "required": [
+        "ar"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "ar": {
+          "type": "string",
+          "minLength": 1
+        },
+        "en": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "PlanStatus": {
+      "description": "Plan state carried in an export.",
+      "enum": [
+        "awaiting_start_state",
+        "active",
+        "paused",
+        "completed",
+        "superseded"
+      ]
+    },
+    "PreferenceKey": {
+      "description": "Closed set of exportable preference keys.",
+      "enum": [
+        "locale",
+        "numerals",
+        "theme",
+        "app_lock",
+        "hijri_dates",
+        "reminders.v1",
+        "planner.declaredDailyMinutes",
+        "csv_separator",
+        "auto_backup",
+        "auto_backup_last"
+      ]
+    },
+    "AdhkarCategory": {
+      "description": "Category identifiers shared with the adhkar schema.",
+      "enum": [
+        "morning",
+        "evening",
+        "sleep",
+        "after_prayer"
+      ]
+    },
+    "PlanRecord": {
+      "description": "Plan header with an optional personal-plan restore snapshot. Organization association is archival provenance only.",
+      "type": "object",
+      "required": [
+        "kind",
+        "id",
+        "curriculum_slug",
+        "curriculum_version",
+        "created_at",
+        "status"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "plan"
+        },
+        "id": {
+          "$ref": "#/$defs/UuidLike"
+        },
+        "corpus_id": {
+          "$ref": "#/$defs/ContentIdentifier"
+        },
+        "curriculum_slug": {
+          "$ref": "#/$defs/ContentIdentifier"
+        },
+        "curriculum_version": {
+          "$ref": "#/$defs/SemVer"
+        },
+        "created_at": {
+          "$ref": "#/$defs/Iso8601DateTime"
+        },
+        "status": {
+          "$ref": "#/$defs/PlanStatus"
+        },
+        "purpose": {
+          "enum": [
+            "read",
+            "memorize",
+            "revise"
+          ],
+          "default": "memorize",
+          "description": "Plan intent. Legacy exports that omit the value default to memorize."
+        },
+        "restore_snapshot": {
+          "$ref": "#/$defs/RestoreSnapshot"
+        },
+        "org_id": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "PlanMetaRecord": {
+      "description": "Auxiliary per-plan metadata.",
+      "type": "object",
+      "required": [
+        "kind",
+        "plan_id",
+        "key",
+        "value"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "plan_meta"
+        },
+        "plan_id": {
+          "$ref": "#/$defs/UuidLike"
+        },
+        "key": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Free-form metadata key."
+        },
+        "value": {
+          "type": "string",
+          "description": "Stored metadata string, which can itself encode a date or JSON value."
+        }
+      }
+    },
+    "PreferenceRecord": {
+      "type": "object",
+      "required": [
+        "kind",
+        "key",
+        "value"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "preference"
+        },
+        "key": {
+          "$ref": "#/$defs/PreferenceKey"
+        },
+        "value": {
+          "description": "A single JSON scalar.",
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      }
+    },
+    "EventRecord": {
+      "type": "object",
+      "required": [
+        "kind",
+        "event_id",
+        "plan_id",
+        "type",
+        "payload",
+        "occurred_at_local",
+        "device_id",
+        "client_seq"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "event"
+        },
+        "event_id": {
+          "$ref": "#/$defs/UuidLike"
+        },
+        "plan_id": {
+          "$ref": "#/$defs/UuidLike"
+        },
+        "type": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Open event type identifier. An importer must preserve types it does not recognize."
+        },
+        "payload": {
+          "type": "object",
+          "description": "An event-type-specific object. Preserve opaque payloads during restore."
+        },
+        "occurred_at_local": {
+          "$ref": "#/$defs/Iso8601DateTime",
+          "description": "Recorded local wall-clock time with a numeric UTC offset."
+        },
+        "device_id": {
+          "$ref": "#/$defs/UuidLike"
+        },
+        "client_seq": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Monotonic sequence per device."
+        }
+      }
+    },
+    "AdhkarRecord": {
+      "description": "Either progress for an existing entry or a complete custom entry.",
+      "type": "object",
+      "required": [
+        "kind",
+        "pack_id",
+        "entry_id",
+        "category",
+        "progress_or_custom_definition"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "adhkar"
+        },
+        "pack_id": {
+          "$ref": "#/$defs/ContentIdentifier"
+        },
+        "entry_id": {
+          "$ref": "#/$defs/ContentIdentifier"
+        },
+        "category": {
+          "$ref": "#/$defs/AdhkarCategory"
+        },
+        "progress_or_custom_definition": {
+          "$ref": "#/$defs/AdhkarProgressOrCustomDefinition"
+        }
+      }
+    },
+    "AdhkarProgressOrCustomDefinition": {
+      "oneOf": [
+        {
+          "type": "object",
+          "required": [
+            "progress"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "progress": {
+              "$ref": "#/$defs/AdhkarProgress"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "required": [
+            "custom_definition"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "custom_definition": {
+              "$ref": "#/$defs/AdhkarCustomDefinition"
+            }
+          }
+        }
+      ],
+      "description": "Exactly one of progress for an existing entry or a complete custom entry."
+    },
+    "AdhkarProgress": {
+      "type": "object",
+      "required": [
+        "count"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "count": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Repetitions completed so far."
+        },
+        "last_completed_local_date": {
+          "$ref": "#/$defs/LocalDate"
+        }
+      }
+    },
+    "AdhkarCustomDefinition": {
+      "type": "object",
+      "required": [
+        "text",
+        "repetitions",
+        "source"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "text": {
+          "$ref": "#/$defs/LocalizedText"
+        },
+        "repetitions": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "A source-supplied repetition count."
+        },
+        "source": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Required source citation."
+        }
+      }
+    },
+    "CurriculumDefinitionRecord": {
+      "description": "Embedded curriculum definition for portable backup and restore.",
+      "type": "object",
+      "required": [
+        "kind",
+        "definition"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "curriculum_definition"
+        },
+        "definition": {
+          "$ref": "masoon.curriculum.v1"
+        },
+        "restore_identity": {
+          "$ref": "#/$defs/CurriculumIdentity"
+        }
+      }
+    },
+    "CorpusRecord": {
+      "description": "Content reference and progress for a corpus-based plan.",
+      "type": "object",
+      "required": [
+        "kind",
+        "corpus_id",
+        "content_ref_id",
+        "content_ref_checksum"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "corpus"
+        },
+        "plan_id": {
+          "$ref": "#/$defs/UuidLike",
+          "description": "Links this reference to the plan so the importer can verify the selected content checksum."
+        },
+        "corpus_id": {
+          "$ref": "#/$defs/ContentIdentifier"
+        },
+        "content_ref_id": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Identifier of the referenced content."
+        },
+        "content_ref_checksum": {
+          "$ref": "#/$defs/Sha256Hex"
+        },
+        "custom_poem": {
+          "$ref": "#/$defs/CustomPoemSnapshot"
+        }
+      },
+      "anyOf": [
+        {
+          "required": [
+            "plan_id"
+          ],
+          "properties": {
+            "plan_id": {}
+          }
+        },
+        {
+          "required": [
+            "custom_poem"
+          ],
+          "properties": {
+            "custom_poem": {}
+          }
+        }
+      ]
+    },
+    "ContentIdentifier": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_:.\\-]*$"
+    },
+    "RestoreSnapshot": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "policy_json",
+        "starting_state_json",
+        "anchor_date",
+        "timezone"
+      ],
+      "properties": {
+        "policy_json": {
+          "type": "string",
+          "minLength": 1
+        },
+        "starting_state_json": {
+          "type": "string",
+          "minLength": 1
+        },
+        "anchor_date": {
+          "$ref": "#/$defs/LocalDate"
+        },
+        "timezone": {
+          "type": "string",
+          "minLength": 1
+        },
+        "title": {
+          "type": "string"
+        },
+        "content_ref_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "content_ref_checksum": {
+          "$ref": "#/$defs/Sha256Hex"
+        }
+      }
+    },
+    "CurriculumIdentity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "version_id",
+        "family_id",
+        "version",
+        "status",
+        "created_at",
+        "family_created_at",
+        "family_updated_at",
+        "family_status"
+      ],
+      "properties": {
+        "version_id": {
+          "$ref": "#/$defs/UuidLike"
+        },
+        "family_id": {
+          "$ref": "#/$defs/UuidLike"
+        },
+        "version": {
+          "$ref": "#/$defs/SemVer"
+        },
+        "status": {
+          "enum": [
+            "draft",
+            "published",
+            "archived"
+          ]
+        },
+        "created_at": {
+          "$ref": "#/$defs/Iso8601DateTime"
+        },
+        "family_created_at": {
+          "$ref": "#/$defs/Iso8601DateTime"
+        },
+        "family_updated_at": {
+          "$ref": "#/$defs/Iso8601DateTime"
+        },
+        "family_status": {
+          "enum": [
+            "draft",
+            "published",
+            "archived"
+          ]
+        }
+      }
+    },
+    "CustomPoemSnapshot": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "title",
+        "unit_count",
+        "checkpoint_units",
+        "created_at",
+        "updated_at"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1
+        },
+        "author": {
+          "type": "string"
+        },
+        "unit_count": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1000000
+        },
+        "checkpoint_units": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "created_at": {
+          "$ref": "#/$defs/Iso8601DateTime"
+        },
+        "updated_at": {
+          "$ref": "#/$defs/Iso8601DateTime"
+        }
+      }
+    }
+  }
+}

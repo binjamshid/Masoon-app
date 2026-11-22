@@ -1,0 +1,10 @@
+# Local build outputs
+.build/
+.swiftpm/
+.gradle/
+.kotlin/
+build/
+DerivedData/
+local.properties
+xcuserdata/
+.DS_Store

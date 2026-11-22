@@ -1,0 +1,26 @@
+name: Bug report
+description: Report unexpected behavior using a sample plan or account.
+body:
+  - type: markdown
+    attributes:
+      value: For security, privacy or account-specific issues, email **support@binjamshid.com** privately. Use synthetic data in this form.
+  - type: input
+    id: version
+    attributes:
+      label: Platform and version
+      description: Include OS, Masoon app version or source revision, and interface language.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: Begin with a sample plan. Mention whether you were offline or signed in.
+    validations:
+      required: true
+  - type: textarea
+    id: behavior
+    attributes:
+      label: Expected and observed behavior
+    validations:
+      required: true

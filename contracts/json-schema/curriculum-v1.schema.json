@@ -1,0 +1,1548 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "masoon.curriculum.v1",
+  "title": "Masoon Curriculum Definition v1",
+  "description": "Closed declarative curriculum language for calendars, selectors, rules, triggers, and workload estimates.",
+  "type": "object",
+  "required": [
+    "meta",
+    "units",
+    "calendar",
+    "sessions",
+    "variables",
+    "selectors",
+    "rules",
+    "triggers",
+    "forecast"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "meta": {
+      "$ref": "#/$defs/Meta"
+    },
+    "units": {
+      "$ref": "#/$defs/Units"
+    },
+    "calendar": {
+      "$ref": "#/$defs/Calendar"
+    },
+    "sessions": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/Session"
+      }
+    },
+    "variables": {
+      "type": "object",
+      "propertyNames": {
+        "$ref": "#/$defs/Identifier"
+      },
+      "additionalProperties": {
+        "$ref": "#/$defs/VariableDef"
+      }
+    },
+    "selectors": {
+      "type": "object",
+      "not": {
+        "title": "The srs_pool selector is reserved for a future format.",
+        "required": [
+          "srs_pool"
+        ],
+        "properties": {
+          "srs_pool": true
+        }
+      },
+      "propertyNames": {
+        "$ref": "#/$defs/Identifier"
+      },
+      "additionalProperties": {
+        "$ref": "#/$defs/SelectorSpec"
+      }
+    },
+    "rules": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/RuleSpec"
+      }
+    },
+    "triggers": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/TriggerSpec"
+      }
+    },
+    "task_deduplication": {
+      "$ref": "#/$defs/TaskDeduplication"
+    },
+    "recovery": {
+      "$ref": "#/$defs/Recovery"
+    },
+    "advancement": {
+      "$ref": "#/$defs/Advancement"
+    },
+    "evidence_defaults": {
+      "$ref": "#/$defs/EvidenceDefaults"
+    },
+    "forecast": {
+      "$ref": "#/$defs/Forecast"
+    }
+  },
+  "$defs": {
+    "Identifier": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]*$"
+    },
+    "VarRef": {
+      "type": "string",
+      "description": "Reference to a declared variable, such as $takrar_count.",
+      "pattern": "^\\$[a-z_][a-z0-9_]*$"
+    },
+    "Weekday": {
+      "enum": [
+        "sun",
+        "mon",
+        "tue",
+        "wed",
+        "thu",
+        "fri",
+        "sat"
+      ]
+    },
+    "WeekdaySet": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/Weekday"
+      }
+    },
+    "WeekdaySetOrVar": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/WeekdaySet"
+        },
+        {
+          "$ref": "#/$defs/VarRef"
+        }
+      ]
+    },
+    "IntOrVar": {
+      "oneOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "$ref": "#/$defs/VarRef"
+        }
+      ]
+    },
+    "NumberOrVar": {
+      "oneOf": [
+        {
+          "type": "number"
+        },
+        {
+          "$ref": "#/$defs/VarRef"
+        }
+      ]
+    },
+    "Unit": {
+      "enum": [
+        "ayah",
+        "line",
+        "page",
+        "rub",
+        "hizb",
+        "juz",
+        "custom_range"
+      ]
+    },
+    "QuranAmount": {
+      "type": "object",
+      "required": [
+        "unit",
+        "value"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "unit": {
+          "$ref": "#/$defs/Unit"
+        },
+        "value": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        }
+      }
+    },
+    "AmountOrVar": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/QuranAmount"
+        },
+        {
+          "$ref": "#/$defs/VarRef"
+        }
+      ]
+    },
+    "LocalizedText": {
+      "type": "object",
+      "required": [
+        "ar"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "ar": {
+          "type": "string",
+          "minLength": 1
+        },
+        "en": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "CanonicalRange": {
+      "type": "object",
+      "description": "A canonical range uses surah and ayah coordinates. Omitted riwayah defaults to the plan’s riwayah.",
+      "required": [
+        "surah",
+        "ayah_start",
+        "ayah_end"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "riwayah": {
+          "type": "string",
+          "minLength": 1
+        },
+        "surah": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 114
+        },
+        "ayah_start": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "ayah_end": {
+          "type": "integer",
+          "minimum": 1
+        }
+      }
+    },
+    "TaskType": {
+      "enum": [
+        "prep_dhikr",
+        "warmup",
+        "tilawah",
+        "new_hifz",
+        "takrar",
+        "murajaah",
+        "listening",
+        "weekend_consolidation",
+        "tasmee",
+        "juz_review",
+        "juz_review_distributed",
+        "cycle_consolidation"
+      ]
+    },
+    "Meta": {
+      "type": "object",
+      "required": [
+        "slug",
+        "title",
+        "non_negotiables"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "slug": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_-]*$"
+        },
+        "title": {
+          "$ref": "#/$defs/LocalizedText"
+        },
+        "description": {
+          "$ref": "#/$defs/LocalizedText"
+        },
+        "pedagogy_notes": {
+          "$ref": "#/$defs/LocalizedText"
+        },
+        "non_negotiables": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Identifier"
+          }
+        },
+        "origin": {
+          "enum": [
+            "builtin",
+            "org",
+            "user"
+          ]
+        },
+        "license_note": {
+          "type": "string"
+        },
+        "version": {
+          "description": "Curriculum version. The default is 1.0.0.",
+          "type": "string",
+          "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$",
+          "default": "1.0.0"
+        },
+        "corpora": {
+          "description": "Kinds of content to which the curriculum applies. Omission implies Qur’an only.",
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "enum": [
+              "quran",
+              "poem"
+            ]
+          }
+        }
+      }
+    },
+    "Units": {
+      "type": "object",
+      "required": [
+        "allowed",
+        "default_pace"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "allowed": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/Unit"
+          }
+        },
+        "default_pace": {
+          "$ref": "#/$defs/QuranAmount"
+        }
+      }
+    },
+    "Calendar": {
+      "type": "object",
+      "required": [
+        "week_start",
+        "day_classes",
+        "exception_classes"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "week_start": {
+          "$ref": "#/$defs/Weekday"
+        },
+        "day_classes": {
+          "type": "object",
+          "minProperties": 1,
+          "propertyNames": {
+            "$ref": "#/$defs/Identifier"
+          },
+          "additionalProperties": {
+            "$ref": "#/$defs/WeekdaySet"
+          }
+        },
+        "exception_classes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Identifier"
+          }
+        }
+      }
+    },
+    "SessionAnchor": {
+      "not": {
+        "title": "The salah_iqama_feed anchor is reserved for a future format.",
+        "const": "salah_iqama_feed"
+      },
+      "oneOf": [
+        {
+          "const": "fixed"
+        },
+        {
+          "type": "object",
+          "required": [
+            "prayer_relative"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "prayer_relative": {
+              "type": "object",
+              "required": [
+                "prayer",
+                "offset_min"
+              ],
+              "additionalProperties": false,
+              "properties": {
+                "prayer": {
+                  "enum": [
+                    "fajr",
+                    "dhuhr",
+                    "asr",
+                    "maghrib",
+                    "isha"
+                  ]
+                },
+                "offset_min": {
+                  "type": "integer",
+                  "minimum": -240,
+                  "maximum": 240
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "Session": {
+      "type": "object",
+      "required": [
+        "id",
+        "title",
+        "default_time",
+        "anchor"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "title": {
+          "$ref": "#/$defs/LocalizedText"
+        },
+        "default_time": {
+          "type": "string",
+          "pattern": "^([01][0-9]|2[0-3]):[0-5][0-9]$"
+        },
+        "anchor": {
+          "$ref": "#/$defs/SessionAnchor"
+        }
+      }
+    },
+    "VariableDef": {
+      "type": "object",
+      "required": [
+        "type",
+        "default"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "enum": [
+            "int",
+            "bool",
+            "amount",
+            "weekday_set",
+            "enum"
+          ]
+        },
+        "default": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/$defs/WeekdaySet"
+            },
+            {
+              "$ref": "#/$defs/QuranAmount"
+            }
+          ]
+        },
+        "min": {
+          "type": "number"
+        },
+        "max": {
+          "type": "number"
+        },
+        "values": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/Identifier"
+          }
+        },
+        "non_negotiable": {
+          "type": "boolean"
+        },
+        "locked": {
+          "type": "boolean"
+        }
+      },
+      "if": {
+        "properties": {
+          "type": {
+            "const": "enum"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "then": {
+        "required": [
+          "values"
+        ],
+        "properties": {
+          "values": true
+        }
+      }
+    },
+    "SelectorSpec": {
+      "description": "Closed deterministic selector vocabulary.",
+      "oneOf": [
+        {
+          "type": "object",
+          "required": [
+            "next_content"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "next_content": {
+              "type": "object",
+              "required": [
+                "amount"
+              ],
+              "additionalProperties": false,
+              "properties": {
+                "amount": {
+                  "$ref": "#/$defs/AmountOrVar"
+                }
+              }
+            }
+          }
+        },
+        {
+          "type": "object",
+          "required": [
+            "next_new"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "next_new": {
+              "type": "object",
+              "required": [
+                "amount"
+              ],
+              "additionalProperties": false,
+              "properties": {
+                "amount": {
+                  "$ref": "#/$defs/AmountOrVar"
+                }
+              }
+            }
+          }
+        },
+        {
+          "type": "object",
+          "required": [
+            "ledger_window"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "ledger_window": {
+              "type": "object",
+              "required": [
+                "days"
+              ],
+              "additionalProperties": false,
+              "properties": {
+                "days": {
+                  "$ref": "#/$defs/IntOrVar"
+                },
+                "sunday_days": {
+                  "$ref": "#/$defs/IntOrVar"
+                }
+              }
+            }
+          }
+        },
+        {
+          "type": "object",
+          "required": [
+            "ledger_offset"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "ledger_offset": {
+              "description": "New material completed on the specific prior date. Empty for a date with no new completion.",
+              "type": "object",
+              "required": [
+                "days_ago"
+              ],
+              "additionalProperties": false,
+              "properties": {
+                "days_ago": {
+                  "$ref": "#/$defs/IntOrVar"
+                }
+              }
+            }
+          }
+        },
+        {
+          "type": "object",
+          "required": [
+            "week_to_date"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "week_to_date": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {}
+            }
+          }
+        },
+        {
+          "type": "object",
+          "required": [
+            "pool_rotation"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "pool_rotation": {
+              "type": "object",
+              "required": [
+                "pool",
+                "per_day"
+              ],
+              "additionalProperties": false,
+              "properties": {
+                "pool": {
+                  "description": "Selects all prior material or a recency window.",
+                  "oneOf": [
+                    {
+                      "const": "prior_hifz"
+                    },
+                    {
+                      "type": "object",
+                      "required": [
+                        "recent_pages"
+                      ],
+                      "additionalProperties": false,
+                      "properties": {
+                        "recent_pages": {
+                          "$ref": "#/$defs/IntOrVar"
+                        }
+                      }
+                    },
+                    {
+                      "type": "object",
+                      "required": [
+                        "recent_juz"
+                      ],
+                      "additionalProperties": false,
+                      "properties": {
+                        "recent_juz": {
+                          "$ref": "#/$defs/IntOrVar"
+                        }
+                      }
+                    },
+                    {
+                      "description": "Complement of the recent-page window, excluding the warm-up union.",
+                      "type": "object",
+                      "required": [
+                        "all_except_recent_pages"
+                      ],
+                      "additionalProperties": false,
+                      "properties": {
+                        "all_except_recent_pages": {
+                          "$ref": "#/$defs/IntOrVar"
+                        }
+                      }
+                    },
+                    {
+                      "description": "Complement of the recent-juz window.",
+                      "type": "object",
+                      "required": [
+                        "all_except_recent_juz"
+                      ],
+                      "additionalProperties": false,
+                      "properties": {
+                        "all_except_recent_juz": {
+                          "$ref": "#/$defs/IntOrVar"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "per_day": {
+                  "oneOf": [
+                    {
+                      "type": "object",
+                      "required": [
+                        "ramp"
+                      ],
+                      "additionalProperties": false,
+                      "properties": {
+                        "ramp": {
+                          "type": "object",
+                          "required": [
+                            "start",
+                            "step",
+                            "ceiling"
+                          ],
+                          "additionalProperties": false,
+                          "properties": {
+                            "start": {
+                              "$ref": "#/$defs/AmountOrVar"
+                            },
+                            "step": {
+                              "$ref": "#/$defs/AmountOrVar"
+                            },
+                            "ceiling": {
+                              "$ref": "#/$defs/AmountOrVar"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "description": "Derives the daily amount from pool size to cover the whole pool in a fixed interval.",
+                      "type": "object",
+                      "required": [
+                        "cycle_days"
+                      ],
+                      "additionalProperties": false,
+                      "properties": {
+                        "cycle_days": {
+                          "$ref": "#/$defs/IntOrVar"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "weak_boost": {
+                  "$ref": "#/$defs/NumberOrVar"
+                }
+              }
+            }
+          }
+        },
+        {
+          "type": "object",
+          "required": [
+            "completed_juz"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "completed_juz": {
+              "type": "object",
+              "required": [
+                "which"
+              ],
+              "additionalProperties": false,
+              "properties": {
+                "which": {
+                  "const": "last"
+                }
+              }
+            }
+          }
+        },
+        {
+          "type": "object",
+          "required": [
+            "prior_hifz_split"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "prior_hifz_split": {
+              "type": "object",
+              "required": [
+                "parts"
+              ],
+              "additionalProperties": false,
+              "properties": {
+                "parts": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              }
+            }
+          }
+        },
+        {
+          "type": "object",
+          "required": [
+            "block"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "block": {
+              "type": "object",
+              "required": [
+                "juz_count",
+                "which"
+              ],
+              "additionalProperties": false,
+              "properties": {
+                "juz_count": {
+                  "$ref": "#/$defs/IntOrVar"
+                },
+                "which": {
+                  "const": "last"
+                }
+              }
+            }
+          }
+        },
+        {
+          "type": "object",
+          "required": [
+            "tomorrow_new"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "tomorrow_new": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {}
+            }
+          }
+        },
+        {
+          "type": "object",
+          "required": [
+            "fixed"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "fixed": {
+              "type": "object",
+              "required": [
+                "range"
+              ],
+              "additionalProperties": false,
+              "properties": {
+                "range": {
+                  "type": "array",
+                  "minItems": 1,
+                  "items": {
+                    "$ref": "#/$defs/CanonicalRange"
+                  },
+                  "description": "A selection crossing a boundary is represented as multiple single-work ranges."
+                }
+              }
+            }
+          }
+        },
+        {
+          "type": "object",
+          "required": [
+            "block_slice"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "block_slice": {
+              "type": "object",
+              "required": [
+                "of",
+                "parts"
+              ],
+              "additionalProperties": false,
+              "properties": {
+                "of": {
+                  "$ref": "#/$defs/Identifier"
+                },
+                "parts": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              }
+            }
+          }
+        },
+        {
+          "type": "object",
+          "required": [
+            "intersect_prior_hifz"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "intersect_prior_hifz": {
+              "type": "object",
+              "required": [
+                "of"
+              ],
+              "additionalProperties": false,
+              "properties": {
+                "of": {
+                  "$ref": "#/$defs/SelectorRef"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "SelectorRef": {
+      "description": "Name of a declared selector or an inline selector.",
+      "oneOf": [
+        {
+          "$ref": "#/$defs/Identifier"
+        },
+        {
+          "$ref": "#/$defs/SelectorSpec"
+        }
+      ]
+    },
+    "TaskDeduplication": {
+      "type": "object",
+      "required": [
+        "mode"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "mode": {
+          "const": "exact_execution"
+        }
+      }
+    },
+    "NotCondition": {
+      "oneOf": [
+        {
+          "enum": [
+            "first_active_day",
+            "in_consolidation_week"
+          ]
+        },
+        {
+          "type": "object",
+          "required": [
+            "has_flag"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "has_flag": {
+              "$ref": "#/$defs/Identifier"
+            }
+          }
+        }
+      ]
+    },
+    "RuleWhen": {
+      "type": "object",
+      "required": [
+        "day_class",
+        "session"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "day_class": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/Identifier"
+            },
+            {
+              "type": "array",
+              "minItems": 1,
+              "uniqueItems": true,
+              "items": {
+                "$ref": "#/$defs/Identifier"
+              }
+            }
+          ]
+        },
+        "session": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "day_in": {
+          "$ref": "#/$defs/VarRef"
+        },
+        "enabled": {
+          "$ref": "#/$defs/VarRef",
+          "description": "Boolean variable that explicitly enables this rule."
+        },
+        "not": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/NotCondition"
+          }
+        }
+      }
+    },
+    "TaskWindow": {
+      "type": "object",
+      "required": [
+        "opens",
+        "closes"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "opens": {
+          "$ref": "#/$defs/Weekday"
+        },
+        "closes": {
+          "$ref": "#/$defs/Weekday"
+        }
+      }
+    },
+    "RuleEmit": {
+      "type": "object",
+      "required": [
+        "type",
+        "ordering"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "$ref": "#/$defs/TaskType"
+        },
+        "select": {
+          "$ref": "#/$defs/SelectorRef"
+        },
+        "repetitions": {
+          "$ref": "#/$defs/IntOrVar"
+        },
+        "spacing_minutes": {
+          "$ref": "#/$defs/IntOrVar"
+        },
+        "listen_count": {
+          "$ref": "#/$defs/IntOrVar"
+        },
+        "window": {
+          "$ref": "#/$defs/TaskWindow"
+        },
+        "info_only": {
+          "type": "boolean"
+        },
+        "ordering": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "label": {
+          "description": "Optional authored display label for the emitted task.",
+          "$ref": "#/$defs/LocalizedText"
+        },
+        "est_minutes": {
+          "description": "Optional authored workload estimate that takes precedence over the rate-based estimate.",
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "RuleSpec": {
+      "type": "object",
+      "required": [
+        "id",
+        "when",
+        "emit"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "when": {
+          "$ref": "#/$defs/RuleWhen"
+        },
+        "emit": {
+          "$ref": "#/$defs/RuleEmit"
+        },
+        "explanation": {
+          "description": "Optional localized learner-facing explanation for the rule.",
+          "$ref": "#/$defs/LocalizedText"
+        },
+        "suppressed_by": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/Identifier"
+          }
+        }
+      }
+    },
+    "TriggerOn": {
+      "oneOf": [
+        {
+          "description": "Fires when a task from the named rule on a closed day was neither verified nor excused.",
+          "type": "object",
+          "required": [
+            "task_failed"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "task_failed": {
+              "type": "object",
+              "required": [
+                "rule"
+              ],
+              "additionalProperties": false,
+              "properties": {
+                "rule": {
+                  "$ref": "#/$defs/Identifier"
+                }
+              }
+            }
+          }
+        },
+        {
+          "type": "object",
+          "required": [
+            "boundary"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "boundary": {
+              "enum": [
+                "juz",
+                "hizb",
+                "surah",
+                "target",
+                "corpus_block"
+              ]
+            },
+            "every": {
+              "$ref": "#/$defs/IntOrVar"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "required": [
+            "cursor_reaches"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "cursor_reaches": {
+              "$ref": "#/$defs/CanonicalRange"
+            }
+          }
+        }
+      ]
+    },
+    "ScheduleEffect": {
+      "type": "object",
+      "required": [
+        "type",
+        "select"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "$ref": "#/$defs/TaskType"
+        },
+        "select": {
+          "$ref": "#/$defs/SelectorRef"
+        },
+        "distribute_over_days": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "into_session": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "starting": {
+          "const": "next_active_day"
+        },
+        "label": {
+          "description": "Optional authored display label for a trigger-scheduled task.",
+          "$ref": "#/$defs/LocalizedText"
+        },
+        "est_minutes": {
+          "description": "Optional authored workload estimate for a trigger-scheduled task.",
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "InsertWeekEffect": {
+      "type": "object",
+      "required": [
+        "name",
+        "day_rules"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "mode_var": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "day_rules": {
+          "description": "Extra rules for the inserted week. An empty array can represent a week that only suppresses rules.",
+          "type": "array",
+          "minItems": 0,
+          "items": {
+            "$ref": "#/$defs/RuleSpec"
+          }
+        }
+      }
+    },
+    "SetFlagEffect": {
+      "type": "object",
+      "required": [
+        "name"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "until": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "ClearFlagEffect": {
+      "type": "object",
+      "required": [
+        "name"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "$ref": "#/$defs/Identifier"
+        }
+      }
+    },
+    "TriggerEffect": {
+      "oneOf": [
+        {
+          "type": "object",
+          "required": [
+            "schedule"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "schedule": {
+              "$ref": "#/$defs/ScheduleEffect"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "required": [
+            "insert_week"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "insert_week": {
+              "$ref": "#/$defs/InsertWeekEffect"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "required": [
+            "set_flag"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "set_flag": {
+              "$ref": "#/$defs/SetFlagEffect"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "required": [
+            "clear_flag"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "clear_flag": {
+              "$ref": "#/$defs/ClearFlagEffect"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "required": [
+            "complete_plan"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "complete_plan": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {}
+            }
+          }
+        }
+      ]
+    },
+    "TriggerSpec": {
+      "type": "object",
+      "required": [
+        "id",
+        "on",
+        "effects"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "on": {
+          "$ref": "#/$defs/TriggerOn"
+        },
+        "effects": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/TriggerEffect"
+          }
+        }
+      }
+    },
+    "Advancement": {
+      "description": "When verification is required, new material advances the cursor only after a verified completion.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "require_verified": {
+          "type": "boolean"
+        }
+      }
+    },
+    "Recovery": {
+      "type": "object",
+      "required": [
+        "allowed_policies",
+        "default",
+        "escalation_days"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "allowed_policies": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "enum": [
+              "strict_backlog",
+              "redistribute",
+              "pause_and_resume"
+            ]
+          }
+        },
+        "default": {
+          "enum": [
+            "strict_backlog",
+            "redistribute",
+            "pause_and_resume",
+            "ask_user"
+          ]
+        },
+        "escalation_days": {
+          "type": "integer",
+          "minimum": 1
+        }
+      }
+    },
+    "EvidenceSpec": {
+      "description": "Completion evidence requirement. Audio submission is reserved for a future format.",
+      "not": {
+        "title": "The audio_submission evidence kind is reserved for a future format.",
+        "anyOf": [
+          {
+            "const": "audio_submission"
+          },
+          {
+            "type": "object",
+            "required": [
+              "audio_submission"
+            ],
+            "properties": {
+              "audio_submission": true
+            }
+          }
+        ]
+      },
+      "oneOf": [
+        {
+          "const": "self_check"
+        },
+        {
+          "type": "object",
+          "required": [
+            "timer"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "timer": {
+              "type": "object",
+              "required": [
+                "min_seconds"
+              ],
+              "additionalProperties": false,
+              "properties": {
+                "min_seconds": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              }
+            }
+          }
+        },
+        {
+          "type": "object",
+          "required": [
+            "counter"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "counter": {
+              "type": "object",
+              "required": [
+                "target"
+              ],
+              "additionalProperties": false,
+              "properties": {
+                "target": {
+                  "$ref": "#/$defs/IntOrVar"
+                }
+              }
+            }
+          }
+        },
+        {
+          "type": "object",
+          "required": [
+            "teacher_verification"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "teacher_verification": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "form_version_id": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              }
+            }
+          }
+        },
+        {
+          "type": "object",
+          "required": [
+            "form"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "form": {
+              "type": "object",
+              "required": [
+                "form_version_id"
+              ],
+              "additionalProperties": false,
+              "properties": {
+                "form_version_id": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              }
+            }
+          }
+        },
+        {
+          "type": "object",
+          "required": [
+            "composite"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "composite": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "$ref": "#/$defs/EvidenceSpec"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "EvidenceDefaults": {
+      "type": "object",
+      "minProperties": 1,
+      "propertyNames": {
+        "enum": [
+          "prep_dhikr",
+          "warmup",
+          "tilawah",
+          "new_hifz",
+          "takrar",
+          "murajaah",
+          "listening",
+          "weekend_consolidation",
+          "tasmee",
+          "juz_review",
+          "juz_review_distributed",
+          "cycle_consolidation",
+          "default"
+        ]
+      },
+      "additionalProperties": {
+        "$ref": "#/$defs/EvidenceSpec"
+      }
+    },
+    "Forecast": {
+      "type": "object",
+      "required": [
+        "workload_rates",
+        "strength_factors"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "workload_rates": {
+          "description": "Integer rates used by the workload estimate.",
+          "type": "object",
+          "minProperties": 1,
+          "propertyNames": {
+            "$ref": "#/$defs/Identifier"
+          },
+          "additionalProperties": {
+            "type": "integer",
+            "exclusiveMinimum": 0
+          }
+        },
+        "strength_factors": {
+          "type": "object",
+          "required": [
+            "weak",
+            "moderate",
+            "strong"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "weak": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "moderate": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "strong": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            }
+          }
+        }
+      }
+    }
+  }
+}
